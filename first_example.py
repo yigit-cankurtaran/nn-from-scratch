@@ -3,10 +3,10 @@ import matplotlib as mpl
 
 #modeling a single neuron
 
-inputs = [1,2,3]
-weights = [0.2, 0.8, -0.5]
+inputs = [1.0 ,2.0 , 3.0, 2.5]
+weights = [0.2, 0.8, -0.5, 1]
 # weights are respective to each input
-bias = 2
+bias = 2.0
 # 1 neuron = 1 bias
 # numbers are random
 
