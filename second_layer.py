@@ -1,5 +1,7 @@
 inputs = [1.0 ,2.0 , 3.0, 2.5]
 
+# 3 neurons
+# each neuron will get every weight
 weights = [[0.2, 0.8, -0.5, 1],
 [0.5, -0.91, 0.26, -0.5],
 [-0.26, -0.27, 0.17, 0.87]]
@@ -23,8 +25,3 @@ for neuron_weights, neuron_bias in zip(weights, biases, strict=True):
     layer_outputs.append(neuron_output)
 
 print(layer_outputs)
-
-    
-
-    
-    
