@@ -8,10 +8,12 @@ print(f"a after array is {b}")
 print(f"shape of a after array is {np.shape(b)}")
 
 c = np.transpose(b)
-print(f"b after transpose {c}")
-print(f"shape of a after transpose is {np.shape(c)}")
+# print(f"b after transpose {c}")
+# print(f"shape of a after transpose is {np.shape(c)}")
 
-d = b.T # another way of getting transpose
-print(f"d is {d}")
-print(f"shape of d is {np.shape(d)}")
+e = [2, 3, 4]
+f = np.array([e]).T
+print(f"e after transpose is {f}")
+
+print(f"the result of a x e is {np.dot(f, b)}")
 
