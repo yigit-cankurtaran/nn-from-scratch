@@ -1,5 +1,6 @@
 import nnfs
 import numpy as np
+from nnfs.datasets import spiral_data
 
 nnfs.init()
 
@@ -14,7 +15,12 @@ class Layer_Dense:
         print(f"weights are {self.weights}")
         print(f"biases are {self.biases}")
     def forward(self, inputs):
-        #calculate output values from inputs, weights and biases
+        # nothing new, turning previous stuff into a method
+        self.output = np.dot(inputs, self.weights) + self.biases
         pass
-        
-Layer_Dense(2, 4)
+
+X, y = spiral_data(samples=100, classes=3)
+dense1 = Layer_Dense(2, 3)
+dense1.forward(X)
+
+print(f"output of first few samples {dense1.output[:5]}")
