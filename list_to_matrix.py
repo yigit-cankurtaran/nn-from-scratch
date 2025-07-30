@@ -15,5 +15,5 @@ e = [2, 3, 4]
 f = np.array([e]).T
 print(f"e after transpose is {f}")
 
-print(f"the result of a x e is {np.dot(f, b)}")
+print(f"the result of a x e is {np.dot(b, f)}")
 
