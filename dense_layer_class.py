@@ -24,6 +24,17 @@ class Activation_ReLU:
     def forward(self, inputs):
         self.output = np.maximum(0, inputs)
 
+class Activation_Softmax:
+    def forward(self, inputs):
+        # unnormalized probabilities
+        # we remove the largest input before exponentiation, it can wreck neurons
+        exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
+        #normalize
+        # axis=1 bc we want the sum of rows
+        probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
+        self.output = probabilities
+
+
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
 activation1 = Activation_ReLU() # creating object
