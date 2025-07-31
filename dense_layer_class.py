@@ -20,8 +20,17 @@ class Layer_Dense:
         pass
     # we'll update weights and biases and such with a backward pass later
 
+class Activation_ReLU:
+    def forward(self, inputs):
+        self.output = np.maximum(0, inputs)
+
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
-dense1.forward(X) # x is our input
+activation1 = Activation_ReLU() # creating object
 
-print(f"output of first few samples:\n {dense1.output[:5]}")
+dense1.forward(X) # forward pass of training data
+activation1.forward(dense1.output) # forward pass through activation function
+
+# we get our activation((inputs * weights) + bias) now
+
+print(f"output of first few samples:\n {activation1.output[:5]}")
