@@ -18,9 +18,10 @@ class Layer_Dense:
         # nothing new, turning previous stuff into a method
         self.output = np.dot(inputs, self.weights) + self.biases
         pass
+    # we'll update weights and biases and such with a backward pass later
 
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
 dense1.forward(X)
 
-print(f"output of first few samples {dense1.output[:5]}")
+print(f"output of first few samples:\n {dense1.output[:5]}")
