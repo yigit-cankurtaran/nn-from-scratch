@@ -27,7 +27,7 @@ class Activation_ReLU:
 class Activation_Softmax:
     def forward(self, inputs):
         # unnormalized probabilities
-        # we remove the largest input before exponentiation, it can wreck neurons
+        # we subtract the largest input from every neuron, it can wreck neurons
         exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
         #normalize
         # axis=1 bc we want the sum of rows
