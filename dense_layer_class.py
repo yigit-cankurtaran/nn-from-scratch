@@ -37,11 +37,15 @@ class Activation_Softmax:
 
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
-activation1 = Activation_ReLU() # creating object
+dense2 = Layer_Dense(3, 3) # 3 rows 3 columns
+activation1 = Activation_ReLU() # creating relu object
+activation2 = Activation_Softmax() # creating softmax object
 
 dense1.forward(X) # forward pass of training data
-activation1.forward(dense1.output) # forward pass through activation function
+activation1.forward(dense1.output) # forward pass through relu
+dense2.forward(activation1.output) # dense2 gets relu's output as input
+activation2.forward(dense2.output) # softmax forward pass
 
-# we get our activation((inputs * weights) + bias) now
+# result after 2 layers + softmax for output
 
-print(f"output of first few samples:\n {activation1.output[:5]}")
+print(f"output of first few samples after softmax:\n {activation2.output[:5]}")
