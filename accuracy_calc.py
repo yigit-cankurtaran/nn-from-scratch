@@ -11,10 +11,13 @@ softmax_outputs = np.array([[ 0.7 , 0.2 , 0.1 ],
 class_targets = np.array([ 0 , 1 , 1 ])
 
 predictions = np.argmax(softmax_outputs, axis=1)
+print(f"predictions are {predictions}")
 
 # if they're one hot matrices convert them
 if len(class_targets.shape) == 2:
     class_targets = np.argmax(class_targets, axis=1)
+
+print(f"class targets are {class_targets}")
 
 accuracy = np.mean(predictions==class_targets)
 
