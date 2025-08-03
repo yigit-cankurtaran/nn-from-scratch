@@ -64,6 +64,7 @@ dense1 = Layer_Dense(2, 3)
 dense2 = Layer_Dense(3, 3) # 3 rows 3 columns
 activation1 = Activation_ReLU() # creating relu object
 activation2 = Activation_Softmax() # creating softmax object
+loss_function = Loss_CategoricalCrossEntropy()
 
 dense1.forward(X) # forward pass of training data
 activation1.forward(dense1.output) # forward pass through relu
@@ -71,5 +72,9 @@ dense2.forward(activation1.output) # dense2 gets relu's output as input
 activation2.forward(dense2.output) # softmax forward pass
 
 # result after 2 layers + softmax for output
-
 print(f"output of first few samples after softmax:\n {activation2.output[:5]}")
+
+# forward pass through loss function
+# softmaxed the output layer, we're passing in the output of that to the loss function
+loss = loss_function.calculate(activation2.output, y)
+print(f"loss: {loss}")
