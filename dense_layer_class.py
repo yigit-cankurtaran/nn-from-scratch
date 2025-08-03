@@ -78,3 +78,12 @@ print(f"output of first few samples after softmax:\n {activation2.output[:5]}")
 # softmaxed the output layer, we're passing in the output of that to the loss function
 loss = loss_function.calculate(activation2.output, y)
 print(f"loss: {loss}")
+
+if len(y.shape) == 2: # convert from one hot matrix
+    y = np.argmax(y, axis=1)
+
+predictions = np.argmax(activation2.output, axis=1)
+accuracy = np.mean(predictions == y)
+# predictions == y creates a boolean array, how many 1s / total bools
+
+print(f"accuracy: {accuracy}")
