@@ -14,3 +14,7 @@ print(x)
 print(y)
 
 h = 0.00001
+
+for num in x:
+    derivative = (f(x + h) - f(x)) / h
+    print(f"derivative of f({num}) is {derivative}")
