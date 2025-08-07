@@ -32,11 +32,12 @@ best_dense2_biases = dense2.biases.copy()
 epoch = 10000
 
 for iter in range(epoch):
-    # generate a new set of weights and biases for iteration
-    dense1.weights = 0.05 * np.random.randn(2,3)
-    dense1.biases = 0.05 * np.random.randn(1,3)
-    dense2.weights = 0.05 * np.random.randn(3,3)
-    dense2.biases = 0.05 * np.random.randn(1,3)
+    # iterate on the set of weights and biases for iteration
+    # choosing weights randomly takes up way too much time
+    dense1.weights += 0.05 * np.random.randn(2,3)
+    dense1.biases += 0.05 * np.random.randn(1,3)
+    dense2.weights += 0.05 * np.random.randn(3,3)
+    dense2.biases += 0.05 * np.random.randn(1,3)
 
     # training data forward pass
     dense1.forward(X)
@@ -56,8 +57,14 @@ for iter in range(epoch):
         best_dense1_weights = dense1.weights.copy()
         best_dense1_biases = dense1.biases.copy()
         best_dense2_weights = dense2.weights.copy()
-        best_dense1_biases = dense2.biases.copy()
+        best_dense2_biases = dense2.biases.copy()
         lowest_loss = loss
+    else:
+        # if current iteration doesn't improve the loss, revert back to usual
+        dense1.weights = best_dense1_weights.copy()
+        dense1.biases = best_dense1_biases.copy()
+        dense2.weights = best_dense2_weights.copy()
+        dense2.biases = best_dense2_biases.copy()
 
 plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap="brg")
 plt.savefig("vertical_data.png") # saving as vertical_data.png
