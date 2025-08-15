@@ -72,3 +72,31 @@ drelu_dw2 = drelu_dxw2 * dmul_dw2
 print(f"how w0 affects final output through multiplication: {drelu_dw0}")
 print(f"how w1 affects final output through multiplication: {drelu_dw1}")
 print(f"how w2 affects final output through multiplication: {drelu_dw2}")
+
+dx = [drelu_dx0, drelu_dx1, drelu_dx2] # input gradients
+dw = [drelu_dw0, drelu_dw1, drelu_dw2] # weight gradients
+db = drelu_db # bias gradient, just 1 bias here so no array
+
+print("\nabout to minimize the output\n")
+# this doesn't really makes sense in a real nn, simple exercise
+
+print(f"w and b currently {w, b}")
+# apply a fraction of the gradients to these values
+
+w[0] += -0.001 * dw[0] # negative bc we want to minimize output
+w[1] += -0.001 * dw[1]
+w[2] += -0.001 * dw[2]
+b += -0.001 * db
+print(f"w and b after gradient {w, b}")
+
+print("forward pass again\n")
+xw0 = x[0] * w[0]
+xw1 = x[1] * w[1]
+xw2 = x[2] * w[2]
+print(xw0, xw1, xw2,b)
+
+z = xw0 + xw1 + xw2 + b
+print(f"new result {z}")
+
+y = max(z, 0) # relu
+print(f"result after relu {y}")
