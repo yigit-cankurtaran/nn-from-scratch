@@ -1,3 +1,5 @@
+# forward pass
+
 x = [1.0, -2.0, 3.0] # input
 w = [-3.0, -1.0, 2.0] # weight
 b = 1.0 # bias
@@ -16,6 +18,8 @@ print(f"relu result {y}")
 # we can treat all these as one big function, relu(inputs * weights + bias(es))
 # relu(x0w0 + x1w1 + x2w2 + b)
 # relu(sum(mul(x0,w0), mul(x1,w1), mul(x2,w2), bias))
+
+#backward pass
 
 relu_dz = (1. if z > 0 else 0.) # we pass z to relu, relu derivative with respect to its input
 
@@ -41,7 +45,7 @@ print(f"how x * w1 affects final output through relu: {drelu_dxw1}")
 print(f"how x * w2 affects final output through relu: {drelu_dxw2}")
 print(f"how +bias affects final output through relu: {drelu_db}")
 
-dmul_dx0 = w[0] # derivative of multiplication
+dmul_dx0 = w[0] # derivative of multiplication wrt inputs
 dmul_dx1 = w[1]
 dmul_dx2 = w[2]
 drelu_dx0 = drelu_dxw0 * dmul_dx0 # chain rule, we know relu+sum derivative, multiply it
@@ -54,3 +58,17 @@ drelu_dx2 = drelu_dxw2 * dmul_dx2
 print(f"how x0 affects final output through multiplication: {drelu_dx0}")
 print(f"how x1 affects final output through multiplication: {drelu_dx1}")
 print(f"how x2 affects final output through multiplication: {drelu_dx2}")
+# this is how much the inputs affect the final output
+
+
+# how much the weights affect the final output
+dmul_dw0 = x[0] # derivative of multiplication wrt weights
+dmul_dw1 = x[1]
+dmul_dw2 = x[2]
+
+drelu_dw0 = drelu_dxw0 * dmul_dw0
+drelu_dw1 = drelu_dxw1 * dmul_dw1 
+drelu_dw2 = drelu_dxw2 * dmul_dw2 
+print(f"how w0 affects final output through multiplication: {drelu_dw0}")
+print(f"how w1 affects final output through multiplication: {drelu_dw1}")
+print(f"how w2 affects final output through multiplication: {drelu_dw2}")
