@@ -18,3 +18,26 @@ print(f"relu result {y}")
 # relu(sum(mul(x0,w0), mul(x1,w1), mul(x2,w2), bias))
 
 relu_dz = (1. if z > 0 else 0.) # we pass z to relu, relu derivative with respect to its input
+
+dvalue = 1.0 # derivative from next layer (of everything AFTER relu in the forward pass)
+drelu_dz = dvalue * relu_dz # derivative 
+print(f"derivatives are {drelu_dz}")
+
+dsum_dxw0 = 1 #partial derivative of sum wrt input * weight0
+dsum_dxw1 = 1 # weight 1 this time
+dsum_dxw2 = 1
+dsum_db = 1 # bias
+# derivative of sum is always 1
+ 
+drelu_dxw0 = drelu_dz * dsum_dxw0
+drelu_dxw1 = drelu_dz * dsum_dxw1
+drelu_dxw2 = drelu_dz * dsum_dxw2
+drelu_db = drelu_dz * dsum_db
+# chain rule, relu comes right after sum, derivative of relu times derivative sums
+# different for each sum bc we're taking partial derivatives for each weight
+
+print(f"how x * w0 affects final output through relu: {drelu_dxw0}")
+print(f"how x * w1 affects final output through relu: {drelu_dxw1}")
+print(f"how x * w2 affects final output through relu: {drelu_dxw2}")
+print(f"how +bias affects final output through relu: {drelu_db}")
+
