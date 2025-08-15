@@ -41,3 +41,16 @@ print(f"how x * w1 affects final output through relu: {drelu_dxw1}")
 print(f"how x * w2 affects final output through relu: {drelu_dxw2}")
 print(f"how +bias affects final output through relu: {drelu_db}")
 
+dmul_dx0 = w[0] # derivative of multiplication
+dmul_dx1 = w[1]
+dmul_dx2 = w[2]
+drelu_dx0 = drelu_dxw0 * dmul_dx0 # chain rule, we know relu+sum derivative, multiply it
+drelu_dx1 = drelu_dxw1 * dmul_dx1 
+drelu_dx2 = drelu_dxw2 * dmul_dx2 
+
+# working backward by taking the ReLU() derivative,
+# taking the summing operation’s derivative, multiplying both and so on
+
+print(f"how x0 affects final output through multiplication: {drelu_dx0}")
+print(f"how x1 affects final output through multiplication: {drelu_dx1}")
+print(f"how x2 affects final output through multiplication: {drelu_dx2}")
