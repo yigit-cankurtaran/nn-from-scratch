@@ -12,11 +12,6 @@ weights = np.array([[0.2, 0.8, -0.5, 1],
 # weights are kept transposed bc we want weights @ inputs to work OOTB
 
 # sum weights of given input (dot product)
-# dx0 = sum(weights[0]*dvalues[0])
-# dx1 = sum(weights[1]*dvalues[0])
-# dx2 = sum(weights[2]*dvalues[0])
-# dx3 = sum(weights[3]*dvalues[0])
-# dinputs = np.array([dx0,dx1,dx2,dx3])
 dinputs = np.dot(dvalues, weights.T) # have to re-transpose bc we need 3x3 @ 3x4
 print(dinputs)
 
@@ -33,3 +28,10 @@ print(dweights)
 biases = np.array([[2,3,0.5]])
 # only need to sum dvalues bc bias derivative is 1
 dbiases = np.sum(dvalues, axis=0, keepdims=True)
+
+# forward pass
+layer_outputs = np.dot(inputs, weights) + biases
+relu_outputs = np.maximum(0, layer_outputs)
+
+drelu = relu_outputs.copy()
+drelu[layer_outputs <= 0] = 0 # derivative of relu is 0 for stuff below 0 and 1 for above
