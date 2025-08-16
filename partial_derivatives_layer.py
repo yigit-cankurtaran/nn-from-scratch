@@ -22,4 +22,14 @@ print(dinputs)
 
 inputs = np.array([[1, 2, 3, 2.5],
 [2., 5., -1., 2],
-[-1.5, 2.7, 3.3, -0.8]])
+[-1.5, 2.7, 3.3, -0.8]]) # shape 3x4
+
+# we want dweights to have the shape of weights
+# weights are now (4,3) bc they're transposed
+# (4,3) @ (3,3) = dweights.shape = (4,3) = weights.shape
+dweights = np.dot(inputs.T, dvalues)
+print(dweights)
+
+biases = np.array([[2,3,0.5]])
+# only need to sum dvalues bc bias derivative is 1
+dbiases = np.sum(dvalues, axis=0, keepdims=True)
