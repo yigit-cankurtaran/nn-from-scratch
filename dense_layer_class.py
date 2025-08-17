@@ -73,6 +73,20 @@ class Loss_CategoricalCrossEntropy(Loss): #inherits Loss class
         negative_log_likelihoods = -np.log(correct_confidences)
         return negative_log_likelihoods
 
+    def backward(self, y_true, dvalues):
+        samples = len(dvalues)
+        labels = len(dvalues[0]) # using first sample to count labels
+
+        # if sparse turn into one hot vector
+        if len(y_true.shape) == 1:
+            y_true = np.eye(labels)[y_true]
+
+        # derivative of CCE
+        self.dinputs = -y_true / dvalues
+        #normalize
+        self.dinputs = self.dinputs / samples
+
+
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
 dense2 = Layer_Dense(3, 3) # 3 rows 3 columns
