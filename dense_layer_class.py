@@ -16,13 +16,27 @@ class Layer_Dense:
         print(f"biases are {self.biases}")
     def forward(self, inputs):
         # nothing new, turning previous stuff into a method
+        self.inputs = inputs  # we want to keep track of inputs
         self.output = np.dot(inputs, self.weights) + self.biases
-        pass
-    # we'll update weights and biases and such with a backward pass later
+
+    def backward(self, dvalues):
+        #parameter gradients
+        self.dweights = np.dot(self.inputs.T, dvalues)
+        self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
+        # value gradient
+        self.dinputs = np.dot(dvalues, self.weights.T)
+
 
 class Activation_ReLU:
     def forward(self, inputs):
+        self.inputs = inputs # we want to keep track of inputs
         self.output = np.maximum(0, inputs)
+
+    def backward(self, dvalues):
+        # we'll modify the vars so we make a copy
+        self.dinputs = dvalues.copy()
+        # if input vals negative zero
+        self.dinputs[self.inputs <= 0] = 0
 
 class Activation_Softmax:
     def forward(self, inputs):
