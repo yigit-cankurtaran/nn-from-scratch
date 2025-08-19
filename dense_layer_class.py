@@ -48,6 +48,18 @@ class Activation_Softmax:
         probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
         self.output = probabilities
 
+    def backward(self, dvalues):
+        self.dinputs = np.empty_like(dvalues)
+
+        #outputs and gradients
+
+        for index, (single_output, single_dvalues) in enumerate(zip(self.output, dvalues)):
+            # flatten output array
+            single_output = single_output.reshape(-1,1)
+            jacobian = np.diagflat(single_output) - np.dot(single_output, single_output.T)
+            #samplewise gradient
+            self.dinputs[index] = np.dot(jacobian, single_dvalues)
+
 #later we'll add more code to this
 class Loss:
     def calculate(self, output, y):
