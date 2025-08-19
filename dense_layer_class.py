@@ -98,6 +98,38 @@ class Loss_CategoricalCrossEntropy(Loss): #inherits Loss class
         #normalize
         self.dinputs = self.dinputs / samples
 
+class Activation_Softmax_Loss_CCE():
+    def __init__(self):
+        self.activation = Activation_Softmax()
+        self.loss = Loss_CategoricalCrossEntropy()
+
+    def forward(self, inputs, y_true):
+        self.activation.forward(inputs)
+        self.output = self.activation.output
+        return self.loss.calculate(self.output, y_true)
+
+    def backward(self, dvalues, y_true):
+        """
+            dvalues = softmax probabilities from forward pass
+            
+        """
+        samples = len(dvalues)
+        # if labels are one hot encoded turn them discrete
+        # discrete = just the index of the correct class
+        if len(y_true.shape) == 2:
+            y_true = np.argmax(y_true, axis=1)
+
+        # copy for safe mods
+        self.dinputs = dvalues.copy()
+        # calculate gradient
+        self.dinputs[range(samples), y_true] -= 1
+        # take the value of the true class, subtract 1 from it
+        # wrong classes stay as 0.
+        # e.g. confidence in the correct output is 0.7, gradient becomes -0.3
+
+        # normalize gradient
+        self.dinputs = self.dinputs / samples
+
 
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
