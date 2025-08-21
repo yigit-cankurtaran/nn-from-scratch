@@ -135,27 +135,33 @@ X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
 dense2 = Layer_Dense(3, 3) # 3 rows 3 columns
 activation1 = Activation_ReLU() # creating relu object
-activation2 = Activation_Softmax() # creating softmax object
-loss_function = Loss_CategoricalCrossEntropy()
+loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
 
 dense1.forward(X) # forward pass of training data
 activation1.forward(dense1.output) # forward pass through relu
 dense2.forward(activation1.output) # dense2 gets relu's output as input
-activation2.forward(dense2.output) # softmax forward pass
+loss = loss_activation.forward(dense2.output, y) # both softmax and the loss
+# loss becomes what the forward method returns
 
-# result after 2 layers + softmax for output
-print(f"output of first few samples after softmax:\n {activation2.output[:5]}")
-
-# forward pass through loss function
-# softmaxed the output layer, we're passing in the output of that to the loss function
-loss = loss_function.calculate(activation2.output, y)
 print(f"loss: {loss}")
 
 if len(y.shape) == 2: # convert from one hot matrix
     y = np.argmax(y, axis=1)
 
-predictions = np.argmax(activation2.output, axis=1)
+predictions = np.argmax(loss_activation.output, axis=1)
 accuracy = np.mean(predictions == y)
 # predictions == y creates a boolean array, how many 1s / total bools
 
 print(f"accuracy: {accuracy}")
+
+#backward pass
+loss_activation.backward(loss_activation.output, y)
+dense2.backward(loss_activation.dinputs)
+activation1.backward(dense2.dinputs)
+dense1.backward(activation1.dinputs)
+
+#printing gradients
+print(dense1.dweights)
+print(dense1.dbiases)
+print(dense2.dweights)
+print(dense2.dbiases)
