@@ -130,12 +130,20 @@ class Activation_Softmax_Loss_CCE():
         # normalize gradient
         self.dinputs = self.dinputs / samples
 
+class Optimizer_SGD():
+    def __init__(self,learning_rate=1.0):
+        self.learning_rate = learning_rate
+
+    def update_params(self,layer):
+        layer.weights += -self.learning_rate * layer.dweights
+        layer.biases += -self.learning_rate * layer.dbiases
 
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 3)
 dense2 = Layer_Dense(3, 3) # 3 rows 3 columns
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
+optimizer = Optimizer_SGD()
 
 dense1.forward(X) # forward pass of training data
 activation1.forward(dense1.output) # forward pass through relu
@@ -165,3 +173,7 @@ print(dense1.dweights)
 print(dense1.dbiases)
 print(dense2.dweights)
 print(dense2.dbiases)
+
+# after we get the gradients we update the network layer parameters
+optimizer.update_params(dense1)
+optimizer.update_params(dense2)
