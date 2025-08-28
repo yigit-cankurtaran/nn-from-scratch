@@ -139,41 +139,41 @@ class Optimizer_SGD():
         layer.biases += -self.learning_rate * layer.dbiases
 
 X, y = spiral_data(samples=100, classes=3)
-dense1 = Layer_Dense(2, 3)
-dense2 = Layer_Dense(3, 3) # 3 rows 3 columns
+dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
+dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
 optimizer = Optimizer_SGD()
 
-dense1.forward(X) # forward pass of training data
-activation1.forward(dense1.output) # forward pass through relu
-dense2.forward(activation1.output) # dense2 gets relu's output as input
-loss = loss_activation.forward(dense2.output, y) # both softmax and the loss
-# loss becomes what the forward method returns
+for epoch in range(10001):
+    dense1.forward(X) # forward pass of training data
+    activation1.forward(dense1.output) # forward pass through relu
+    dense2.forward(activation1.output) # dense2 gets relu's output as input
+    loss = loss_activation.forward(dense2.output, y) # both softmax and the loss
+    # loss becomes what the forward method returns
+    
+    if len(y.shape) == 2: # convert from one hot matrix
+        y = np.argmax(y, axis=1)
+    
+    predictions = np.argmax(loss_activation.output, axis=1)
+    accuracy = np.mean(predictions == y)
+    # predictions == y creates a boolean array, how many 1s / total bools
 
-print(f"loss: {loss}")
+    if not epoch % 100: # same thing as epoch % 100 == 0
+        print(f"epoch:{epoch}\nacc:{accuracy}\nloss:{loss}")
 
-if len(y.shape) == 2: # convert from one hot matrix
-    y = np.argmax(y, axis=1)
-
-predictions = np.argmax(loss_activation.output, axis=1)
-accuracy = np.mean(predictions == y)
-# predictions == y creates a boolean array, how many 1s / total bools
-
-print(f"accuracy: {accuracy}")
-
-#backward pass
-loss_activation.backward(loss_activation.output, y)
-dense2.backward(loss_activation.dinputs)
-activation1.backward(dense2.dinputs)
-dense1.backward(activation1.dinputs)
-
-#printing gradients
-print(dense1.dweights)
-print(dense1.dbiases)
-print(dense2.dweights)
-print(dense2.dbiases)
-
-# after we get the gradients we update the network layer parameters
-optimizer.update_params(dense1)
-optimizer.update_params(dense2)
+    #backward pass
+    loss_activation.backward(loss_activation.output, y)
+    dense2.backward(loss_activation.dinputs)
+    activation1.backward(dense2.dinputs)
+    dense1.backward(activation1.dinputs)
+    
+    # #printing gradients
+    # print(dense1.dweights)
+    # print(dense1.dbiases)
+    # print(dense2.dweights)
+    # print(dense2.dbiases)
+    
+    # after we get the gradients we update the network layer parameters
+    optimizer.update_params(dense1)
+    optimizer.update_params(dense2)
