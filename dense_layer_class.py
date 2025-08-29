@@ -4,8 +4,6 @@ from nnfs.datasets import spiral_data
 
 nnfs.init()
 
-# print(np.random.randn(2,6)) # means shape of (2,6)
-
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
         #initialize weights and biases
@@ -25,7 +23,6 @@ class Layer_Dense:
         self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
         # value gradient
         self.dinputs = np.dot(dvalues, self.weights.T)
-
 
 class Activation_ReLU:
     def forward(self, inputs):
@@ -60,7 +57,6 @@ class Activation_Softmax:
             #samplewise gradient
             self.dinputs[index] = np.dot(jacobian, single_dvalues)
 
-#later we'll add more code to this
 class Loss:
     def calculate(self, output, y):
         # sample losses
@@ -131,11 +127,12 @@ class Activation_Softmax_Loss_CCE():
         self.dinputs = self.dinputs / samples
 
 class Optimizer_SGD():
-    def __init__(self,learning_rate=1.0, decay=0.0):
+    def __init__(self,learning_rate=1.0, decay=0.0, momentum=0.):
         self.learning_rate = learning_rate
         self.current_lr = learning_rate
         self.decay = decay
         self.iterations = 0
+        self.momentum = momentum
 
     # before parameter updates
     def pre_update_params(self):
@@ -143,8 +140,24 @@ class Optimizer_SGD():
             self.current_lr = self.learning_rate * (1. / (1. + self.decay * self.iterations))
 
     def update_params(self,layer):
-        layer.weights += -self.current_lr * layer.dweights
-        layer.biases += -self.current_lr * layer.dbiases
+        if self.momentum:
+            if not hasattr(layer, "weight_momentums"):
+                # if layer doesn't have momentum create them w 0s
+                layer.weight_momentums = np.zeros_like(layer.weights)
+                # if no momentum for weights biases don't exist either, create them
+                layer.bias_momentums = np.zeros_like(layer.biases)
+
+            # take previous updates multiplied by retain factor, update w current gradients
+            weight_updates = self.momentum * layer.weight_momentums - self.current_lr * layer.dweights
+            layer.weight_momentums = weight_updates
+            bias_updates = self.momentum * layer.bias_momentums - self.current_lr * layer.dbiases
+            layer.bias_momentums = bias_updates
+        else:    
+            weight_updates += -self.current_lr * layer.dweights
+            bias_updates += -self.current_lr * layer.dbiases
+
+        layer.weights += weight_updates
+        layer.biases += bias_updates
 
     def post_update_params(self):
         self.iterations += 1
@@ -155,7 +168,7 @@ dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
 dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
-optimizer = Optimizer_SGD(decay=0.0001)
+optimizer = Optimizer_SGD(decay=0.001, momentum=0.9)
 
 for epoch in range(100001):
     dense1.forward(X) # forward pass of training data
