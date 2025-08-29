@@ -141,13 +141,14 @@ class Optimizer_SGD():
 
     def update_params(self,layer):
         if self.momentum:
-            if not hasattr(layer, "weight_momentums"):
-                # if layer doesn't have momentum create them w 0s
+            if not hasattr(layer, "weight_momentums"): # initially false
+                # if layer doesn't have momentum (initially doesn't) create them w 0s
                 layer.weight_momentums = np.zeros_like(layer.weights)
                 # if no momentum for weights biases don't exist either, create them
                 layer.bias_momentums = np.zeros_like(layer.biases)
 
             # take previous updates multiplied by retain factor, update w current gradients
+            # gets dweights and dbiases during backprop, we pass layers into this
             weight_updates = self.momentum * layer.weight_momentums - self.current_lr * layer.dweights
             layer.weight_momentums = weight_updates
             bias_updates = self.momentum * layer.bias_momentums - self.current_lr * layer.dbiases
@@ -192,12 +193,6 @@ for epoch in range(100001):
     dense2.backward(loss_activation.dinputs)
     activation1.backward(dense2.dinputs)
     dense1.backward(activation1.dinputs)
-    
-    # #printing gradients
-    # print(dense1.dweights)
-    # print(dense1.dbiases)
-    # print(dense2.dweights)
-    # print(dense2.dbiases)
     
     # after we get the gradients we update the network layer parameters
     optimizer.pre_update_params()
