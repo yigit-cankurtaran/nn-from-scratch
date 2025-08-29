@@ -131,21 +131,33 @@ class Activation_Softmax_Loss_CCE():
         self.dinputs = self.dinputs / samples
 
 class Optimizer_SGD():
-    def __init__(self,learning_rate=1.0):
+    def __init__(self,learning_rate=1.0, decay=0.0):
         self.learning_rate = learning_rate
+        self.current_lr = learning_rate
+        self.decay = decay
+        self.iterations = 0
+
+    # before parameter updates
+    def pre_update_params(self):
+        if self.decay:
+            self.current_lr = self.learning_rate * (1. / (1. + self.decay * self.iterations))
 
     def update_params(self,layer):
-        layer.weights += -self.learning_rate * layer.dweights
-        layer.biases += -self.learning_rate * layer.dbiases
+        layer.weights += -self.current_lr * layer.dweights
+        layer.biases += -self.current_lr * layer.dbiases
+
+    def post_update_params(self):
+        self.iterations += 1
+    # in production optimizers the .step() method runs these 3 in order
 
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
 dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
-optimizer = Optimizer_SGD()
+optimizer = Optimizer_SGD(decay=0.0001)
 
-for epoch in range(10001):
+for epoch in range(100001):
     dense1.forward(X) # forward pass of training data
     activation1.forward(dense1.output) # forward pass through relu
     dense2.forward(activation1.output) # dense2 gets relu's output as input
@@ -160,7 +172,7 @@ for epoch in range(10001):
     # predictions == y creates a boolean array, how many 1s / total bools
 
     if not epoch % 100: # same thing as epoch % 100 == 0
-        print(f"epoch:{epoch}\nacc:{accuracy}\nloss:{loss}")
+        print(f"epoch:{epoch}\nacc:{accuracy}\nloss:{loss}\nlr:{optimizer.current_lr}")
 
     #backward pass
     loss_activation.backward(loss_activation.output, y)
@@ -175,5 +187,7 @@ for epoch in range(10001):
     # print(dense2.dbiases)
     
     # after we get the gradients we update the network layer parameters
+    optimizer.pre_update_params()
     optimizer.update_params(dense1)
     optimizer.update_params(dense2)
+    optimizer.post_update_params()
