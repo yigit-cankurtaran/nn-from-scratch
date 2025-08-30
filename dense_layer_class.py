@@ -164,6 +164,39 @@ class Optimizer_SGD():
         self.iterations += 1
     # in production optimizers the .step() method runs these 3 in order
 
+class Optimizer_AdaGrad():
+    def __init__(self,learning_rate=1.0, decay=0.0, epsilon=1e-7):
+        self.learning_rate = learning_rate
+        self.current_lr = learning_rate
+        self.decay = decay
+        self.iterations = 0
+        self.epsilon = epsilon
+
+    # before parameter updates
+    def pre_update_params(self):
+        if self.decay:
+            self.current_lr = self.learning_rate * (1. / (1. + self.decay * self.iterations))
+
+    def update_params(self,layer):
+        if self.momentum:
+            if not hasattr(layer, "weight_cache"): # initially false
+                # if layer doesn't have momentum (initially doesn't) create them w 0s
+                layer.weight_cache = np.zeros_like(layer.weights)
+                # if no momentum for weights biases don't exist either, create them
+                layer.bias_cache = np.zeros_like(layer.biases)
+
+            # update cache with squared current grad
+            layer.weight_cache += layer.dweights**2
+            layer.bias_cache += layer.dbiases**2
+
+            #vanilla SGD parameter update + normalization with square rooted cache
+            layer.weights += -self.current_lr * layer.dweights / (np.sqrt(layer.weight_cache) + self.epsilon)
+            layer.biases += -self.current_lr * layer.dbiases / (np.sqrt(layer.bias_cache) + self.epsilon)
+
+    def post_update_params(self):
+        self.iterations += 1
+    # in production optimizers the .step() method runs these 3 in order
+
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
 dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
