@@ -196,12 +196,45 @@ class Optimizer_AdaGrad():
         self.iterations += 1
     # in production optimizers the .step() method runs these 3 in order
 
+class Optimizer_RMSprop():
+    def __init__(self,learning_rate=1.0, decay=0.0, epsilon=1e-7, rho=0.9):
+        self.learning_rate = learning_rate
+        self.current_lr = learning_rate
+        self.decay = decay
+        self.iterations = 0
+        self.epsilon = epsilon
+        self.rho = rho
+
+    # before parameter updates
+    def pre_update_params(self):
+        if self.decay:
+            self.current_lr = self.learning_rate * (1. / (1. + self.decay * self.iterations))
+
+    def update_params(self,layer):
+       if not hasattr(layer, "weight_cache"): # initially false
+           # if layer doesn't have momentum (initially doesn't) create them w 0s
+           layer.weight_cache = np.zeros_like(layer.weights)
+           # if no momentum for weights biases don't exist either, create them
+           layer.bias_cache = np.zeros_like(layer.biases)
+
+       # update cache with the RMSprop equation, different than AdaGrad
+       layer.weight_cache = self.rho * layer.weight_cache + (1-self.rho) * layer.dweights**2
+       layer.bias_cache = self.rho * layer.bias_cache + (1-self.rho) * layer.dbiases**2
+
+       # updates are implemented the same way as AdaProp
+       layer.weights += -self.current_lr * layer.dweights / (np.sqrt(layer.weight_cache) + self.epsilon)
+       layer.biases += -self.current_lr * layer.dbiases / (np.sqrt(layer.bias_cache) + self.epsilon)
+
+    def post_update_params(self):
+        self.iterations += 1
+    # in production optimizers the .step() method runs these 3 in order
+
 X, y = spiral_data(samples=100, classes=3)
 dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
 dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
-optimizer = Optimizer_AdaGrad(decay=1e-4)
+optimizer = Optimizer_RMSprop(learning_rate=0.02, decay=1e-5, rho=0.999)
 
 for epoch in range(100001):
     dense1.forward(X) # forward pass of training data
