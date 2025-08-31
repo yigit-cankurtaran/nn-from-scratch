@@ -241,11 +241,11 @@ class Optimizer_Adam:
         self.beta_1 = beta_1
         self.beta_2 = beta_2
 
-        def pre_update_params(self):
+    def pre_update_params(self):
             if self.decay:
                 self.current_lr = self.learning_rate * (1. / (1. + self.decay * self.iterations))
 
-        def update_params(self, layer):
+    def update_params(self, layer):
             if not hasattr(layer, 'weight_cache'):
                 layer.weight_momentums = np.zeros_like(layer.weights)
                 layer.weight_cache = np.zeros_like(layer.weights)
@@ -270,7 +270,7 @@ class Optimizer_Adam:
             layer.weights += -self.current_lr * weight_momentums_corrected / (np.sqrt(weight_cache_corrected) + self.epsilon)
             layer.biases += -self.current_lr * bias_momentums_corrected / (np.sqrt(bias_cache_corrected) + self.epsilon)
 
-        def post_update_params(self):
+    def post_update_params(self):
             self.iterations += 1
 
 X, y = spiral_data(samples=100, classes=3)
@@ -278,7 +278,7 @@ dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
 dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
-optimizer = Optimizer_RMSprop(learning_rate=0.02, decay=1e-5, rho=0.999)
+optimizer = Optimizer_Adam()
 
 for epoch in range(100001):
     dense1.forward(X) # forward pass of training data
