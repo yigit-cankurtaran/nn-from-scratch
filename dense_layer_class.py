@@ -278,7 +278,7 @@ dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
 dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
-optimizer = Optimizer_Adam()
+optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-7) # higher LR, added LR decay
 
 for epoch in range(100001):
     dense1.forward(X) # forward pass of training data
