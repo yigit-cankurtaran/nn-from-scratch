@@ -5,13 +5,17 @@ from nnfs.datasets import spiral_data
 nnfs.init()
 
 class Layer_Dense:
-    def __init__(self, n_inputs, n_neurons):
+    def __init__(self, n_inputs, n_neurons, weightregl1=0, weightregl2=0,
+                 biasregl1=0, biasregl2=0):
         #initialize weights and biases
         # weights are random, biases are zero
         self.weights = 0.01 * np.random.randn(n_inputs, n_neurons) #small, random magnitudes
         self.biases = np.zeros((1, n_neurons))
-        print(f"weights are {self.weights}")
-        print(f"biases are {self.biases}")
+        self.weightregl1 = weightregl1
+        self.weightregl2 = weightregl2
+        self.biasregl1 = biasregl1
+        self.biasregl2 = biasregl2
+
     def forward(self, inputs):
         # nothing new, turning previous stuff into a method
         self.inputs = inputs  # we want to keep track of inputs
