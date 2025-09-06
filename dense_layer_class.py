@@ -62,6 +62,29 @@ class Activation_Softmax:
             self.dinputs[index] = np.dot(jacobian, single_dvalues)
 
 class Loss:
+    def reg_loss(self, layer):
+        reg_loss = 0 # default
+
+        #l1 weight reg, only when bigger than 0
+        if layer.weightregl1 > 0:
+            reg_loss += layer.weightregl1 * np.sum(np.abs(layer.weights))
+
+        #l2 weight reg, only when bigger than 0
+        if layer.weightregl2 > 0:
+            # if square here doesn't work just do weights * weights
+            reg_loss += layer.weightregl2 * np.sum(layer.weights ** 2)
+
+        #l1 bias reg, only when bigger than 0
+        if layer.biasregl1 > 0:
+            reg_loss += layer.biasregl1 * np.sum(np.abs(layer.biases))
+
+        #l2 bias reg, only when bigger than 0
+        if layer.biasregl2 > 0:
+            # if square here doesn't work just do biass * biass
+            reg_loss += layer.biasregl2 * np.sum(layer.biases ** 2)
+
+        return reg_loss
+        
     def calculate(self, output, y):
         # sample losses
         sample_losses = self.forward(output, y)
