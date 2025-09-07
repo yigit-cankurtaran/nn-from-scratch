@@ -307,12 +307,15 @@ activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
 optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-7) # higher LR, added LR decay
 
-for epoch in range(100001):
+for epoch in range(10001):
     dense1.forward(X) # forward pass of training data
     activation1.forward(dense1.output) # forward pass through relu
     dense2.forward(activation1.output) # dense2 gets relu's output as input
-    loss = loss_activation.forward(dense2.output, y) # both softmax and the loss
+    data_loss = loss_activation.forward(dense2.output, y) # both softmax and the loss
     # loss becomes what the forward method returns
+    # implementing regularization here
+    reg_loss = loss_activation.loss.reg_loss(dense1) + loss_activation.loss.reg_loss(dense2)
+    loss = data_loss + reg_loss
     
     if len(y.shape) == 2: # convert from one hot matrix
         y = np.argmax(y, axis=1)
@@ -344,7 +347,9 @@ print("test dataset created")
 dense1.forward(X_test)
 activation1.forward(dense1.output)
 dense2.forward(activation1.output)
-loss = loss_activation.forward(dense2.output, y_test)
+data_loss = loss_activation.forward(dense2.output, y)
+reg_loss = loss_activation.loss.reg_loss(dense1) + loss_activation.loss.reg_loss(dense2)
+loss = data_loss + reg_loss
 
 predictions = np.argmax(loss_activation.output, axis=1)
 if len(y_test.shape) == 2:
