@@ -25,6 +25,28 @@ class Layer_Dense:
         #parameter gradients
         self.dweights = np.dot(self.inputs.T, dvalues)
         self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
+        #gradients on regularization
+        # l1 on weights
+        if self.weightregl1 > 0:
+            # l1 is a sum operation,its derivative is 1 if weight>0 and -1 else
+            dL1 = np.ones_like(self.weights)
+            dL1[self.weights < 0] = -1
+            self.dweights += self.weightregl1 * dL1
+        #l2 on weights
+        if self.weightregl2 > 0:
+            # l2 squares and sums, derivative(x^2)=2x
+            self.dweights += 2 * self.weightregl2 * self.weights
+
+        #l1 on biases
+        if self.biasregl1 > 0:
+            dL1 = np.ones_like(self.biases)
+            dL1[self.biases < 0] = -1
+            self.dbiases += self.biasregl1 * dL1
+        #l2 on biases
+        if self.biasregl2 > 0:
+            # l2 squares and sums, derivative(x^2)=2x
+            self.dbiases += 2 * self.biasregl2 * self.biases
+
         # value gradient
         self.dinputs = np.dot(dvalues, self.weights.T)
 
@@ -301,7 +323,9 @@ class Optimizer_Adam:
             self.iterations += 1
 
 X, y = spiral_data(samples=100, classes=3)
-dense1 = Layer_Dense(2, 64) # 2 inputs 64 outputs
+dense1 = Layer_Dense(2, 64, weightregl2=5e-4, biasregl2=5e-4) # 2 inputs 64 outputs, l2 reg
+# we usually add regularization terms to the hidden layers only
+
 dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
@@ -325,7 +349,7 @@ for epoch in range(10001):
     # predictions == y creates a boolean array, how many 1s / total bools
 
     if not epoch % 100: # same thing as epoch % 100 == 0
-        print(f"epoch:{epoch}\nacc:{accuracy}\nloss:{loss}\nlr:{optimizer.current_lr}")
+        print(f"epoch:{epoch}\nacc:{accuracy}\ndata loss:{data_loss}\nregularization loss:{reg_loss}\nlr:{optimizer.current_lr}")
 
     #backward pass
     loss_activation.backward(loss_activation.output, y)
