@@ -323,10 +323,10 @@ class Optimizer_Adam:
             self.iterations += 1
 
 X, y = spiral_data(samples=100, classes=3)
-dense1 = Layer_Dense(2, 64, weightregl2=5e-4, biasregl2=5e-4) # 2 inputs 64 outputs, l2 reg
+dense1 = Layer_Dense(2, 512, weightregl2=5e-4, biasregl2=5e-4) # 2 inputs 64 outputs, l2 reg
 # we usually add regularization terms to the hidden layers only
 
-dense2 = Layer_Dense(64, 3) # 64 inputs 3 outputs
+dense2 = Layer_Dense(512, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
 optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-7) # higher LR, added LR decay
