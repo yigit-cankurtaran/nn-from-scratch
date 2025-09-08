@@ -364,14 +364,14 @@ for epoch in range(10001):
     optimizer.post_update_params()
 
 # validating the model
-X_test, y_test = spiral_data(samples=100, classes=3) # test dataset
+X_test, y_test = spiral_data(samples=1000, classes=3) # test dataset
 print("test dataset created")
 
 # forward pass
 dense1.forward(X_test)
 activation1.forward(dense1.output)
 dense2.forward(activation1.output)
-data_loss = loss_activation.forward(dense2.output, y)
+data_loss = loss_activation.forward(dense2.output, y_test)
 reg_loss = loss_activation.loss.reg_loss(dense1) + loss_activation.loss.reg_loss(dense2)
 loss = data_loss + reg_loss
 
