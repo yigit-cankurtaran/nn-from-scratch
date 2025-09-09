@@ -50,6 +50,18 @@ class Layer_Dense:
         # value gradient
         self.dinputs = np.dot(dvalues, self.weights.T)
 
+class Layer_Dropout:
+    def __init__(self, rate):
+        self.rate = 1-rate
+
+    def forward(self, inputs):
+        self.inputs = inputs
+        self.binary_mask = np.random.binomial(1, self.rate, size=inputs.shape) / self.rate
+        self.output = inputs * self.binary_mask
+
+    def backward(self, dvalues):
+        self.dinputs = dvalues * self.binary_mask
+
 class Activation_ReLU:
     def forward(self, inputs):
         self.inputs = inputs # we want to keep track of inputs
@@ -329,12 +341,14 @@ dense1 = Layer_Dense(2, 512, weightregl2=5e-4, biasregl2=5e-4) # 2 inputs 64 out
 dense2 = Layer_Dense(512, 3) # 64 inputs 3 outputs
 activation1 = Activation_ReLU() # creating relu object
 loss_activation = Activation_Softmax_Loss_CCE() # will replace the separate loss and activation
-optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-7) # higher LR, added LR decay
+optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-5) # higher LR, added LR decay
+dropout1 =Layer_Dropout(0.1)
 
 for epoch in range(10001):
     dense1.forward(X) # forward pass of training data
     activation1.forward(dense1.output) # forward pass through relu
-    dense2.forward(activation1.output) # dense2 gets relu's output as input
+    dropout1.forward(activation1.output) # adding dropout after the first layer
+    dense2.forward(dropout1.output) # dense2 gets relu's output as input
     data_loss = loss_activation.forward(dense2.output, y) # both softmax and the loss
     # loss becomes what the forward method returns
     # implementing regularization here
@@ -354,7 +368,8 @@ for epoch in range(10001):
     #backward pass
     loss_activation.backward(loss_activation.output, y)
     dense2.backward(loss_activation.dinputs)
-    activation1.backward(dense2.dinputs)
+    dropout1.backward(dense2.dinputs) # adding dropout right before the activation
+    activation1.backward(dropout1.dinputs)
     dense1.backward(activation1.dinputs)
     
     # after we get the gradients we update the network layer parameters
