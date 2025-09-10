@@ -163,6 +163,10 @@ class Loss_CategoricalCrossEntropy(Loss): #inherits Loss class
         #normalize
         self.dinputs = self.dinputs / samples
 
+class Loss_BinaryCrossEntropy(Loss):
+    #continuing the negative log from CCE
+    # instead of only target class we will sum likelihoods for 1 and 0 separately
+
 class Activation_Softmax_Loss_CCE():
     def __init__(self):
         self.activation = Activation_Softmax()
