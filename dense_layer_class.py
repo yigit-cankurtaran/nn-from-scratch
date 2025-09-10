@@ -95,6 +95,14 @@ class Activation_Softmax:
             #samplewise gradient
             self.dinputs[index] = np.dot(jacobian, single_dvalues)
 
+class Activation_Sigmoid:
+    def forward(self, inputs):
+        self.inputs = inputs
+        self.output = 1 / 1 + np.exp(-inputs)
+
+    def backward(self, dvalues):
+        self.dinputs = dvalues * (1-self.output) * self.output
+
 class Loss:
     def reg_loss(self, layer):
         reg_loss = 0 # default
