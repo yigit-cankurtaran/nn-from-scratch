@@ -118,7 +118,7 @@ class Activation_Softmax:
 class Activation_Sigmoid:
     def forward(self, inputs):
         self.inputs = inputs
-        self.output = 1 / 1 + np.exp(-inputs)
+        self.output = 1 / (1 + np.exp(-inputs))
 
     def backward(self, dvalues):
         self.dinputs = dvalues * (1 - self.output) * self.output
@@ -207,6 +207,10 @@ class Loss_BinaryCrossEntropy(Loss):
 
         # preventing div by 0
         clipped_dvalues = np.clip(dvalues, 1e-7, 1 - 1e-7)
+
+        # ensure y_true has the same shape as dvalues for proper broadcasting
+        if len(y_true.shape) == 1:
+            y_true = y_true.reshape(-1, 1)
 
         self.dinputs = (
             -(y_true / clipped_dvalues - (1 - y_true) / (1 - clipped_dvalues)) / outputs
@@ -484,6 +488,8 @@ dense2 = Layer_Dense(64, 1)  # 64 inputs 1 output
 activation1 = Activation_ReLU()  # creating relu object
 activation2 = Activation_Sigmoid()
 
+loss_function = Loss_BinaryCrossEntropy()
+
 optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-5)  # higher LR, added LR decay
 dropout1 = Layer_Dropout(0.1)
 
@@ -492,18 +498,20 @@ for epoch in range(10001):
     activation1.forward(dense1.output)  # forward pass through relu
     dropout1.forward(activation1.output)  # adding dropout after the first layer
     dense2.forward(dropout1.output)  # dense2 gets relu's output as input
-    data_loss = loss_activation.forward(dense2.output, y)  # both softmax and the loss
+    # data_loss = loss_activation.forward(dense2.output, y)  # both softmax and the loss
     # loss becomes what the forward method returns
     # implementing regularization here
-    reg_loss = loss_activation.loss.reg_loss(dense1) + loss_activation.loss.reg_loss(
-        dense2
-    )
+    activation2.forward(dense2.output)
+    data_loss = loss_function.calculate(activation2.output, y)
+
+    reg_loss = loss_function.reg_loss(dense1) + loss_function.reg_loss(dense2)
     loss = data_loss + reg_loss
 
-    if len(y.shape) == 2:  # convert from one hot matrix
-        y = np.argmax(y, axis=1)
+    # for the multi class thing
+    # if len(y.shape) == 2:  # convert from one hot matrix
+    #     y = np.argmax(y, axis=1)
 
-    predictions = np.argmax(loss_activation.output, axis=1)
+    predictions = (activation2.output > 0.5) * 1
     accuracy = np.mean(predictions == y)
     # predictions == y creates a boolean array, how many 1s / total bools
 
@@ -513,8 +521,9 @@ for epoch in range(10001):
         )
 
     # backward pass
-    loss_activation.backward(loss_activation.output, y)
-    dense2.backward(loss_activation.dinputs)
+    loss_function.backward(activation2.output, y)
+    activation2.backward(loss_function.dinputs)
+    dense2.backward(activation2.dinputs)
     dropout1.backward(dense2.dinputs)  # adding dropout right before the activation
     activation1.backward(dropout1.dinputs)
     dense1.backward(activation1.dinputs)
@@ -526,20 +535,18 @@ for epoch in range(10001):
     optimizer.post_update_params()
 
 # validating the model
-X_test, y_test = spiral_data(samples=1000, classes=3)  # test dataset
+X_test, y_test = spiral_data(samples=1000, classes=2)  # test dataset
+# reshape this y_test as well
+y_test = y_test.reshape(-1, 1)
 print("test dataset created")
 
-# forward pass
+# forward pass (no dropout during validation)
 dense1.forward(X_test)
 activation1.forward(dense1.output)
 dense2.forward(activation1.output)
-data_loss = loss_activation.forward(dense2.output, y_test)
-reg_loss = loss_activation.loss.reg_loss(dense1) + loss_activation.loss.reg_loss(dense2)
-loss = data_loss + reg_loss
-
-predictions = np.argmax(loss_activation.output, axis=1)
-if len(y_test.shape) == 2:
-    y_test = np.argmax(y_test, axis=1)
+activation2.forward(dense2.output)
+loss = loss_function.calculate(activation2.output, y_test)
+predictions = (activation2.output > 0.5) * 1
 accuracy = np.mean(predictions == y_test)
 
 print(f"validation acc:{accuracy}, loss:{loss}")
