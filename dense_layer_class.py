@@ -189,7 +189,31 @@ class Loss_CategoricalCrossEntropy(Loss):  # inherits Loss class
 class Loss_BinaryCrossEntropy(Loss):
     # continuing the negative log from CCE
     # instead of only target class we will sum likelihoods for 1 and 0 separately
-    pass
+    def forward(self, y_pred, y_true):
+        # preventing div by 0
+        y_pred_clipped = np.clip(y_pred, 1e-7, 1 - 1e-7)
+
+        sample_losses = -(
+            y_true * np.log(y_pred_clipped) + (1 - y_true) * np.log(1 - y_pred_clipped)
+        )
+        sample_losses = np.mean(sample_losses, axis=-1)
+
+        return sample_losses
+
+    def backward(self, dvalues, y_true):
+        samples = len(dvalues)
+        # using first samples to count num of outputs
+        outputs = len(dvalues[0])
+
+        # preventing div by 0
+        clipped_dvalues = np.clip(dvalues, 1e-7, 1 - 1e-7)
+
+        self.dinputs = (
+            -(y_true / clipped_dvalues - (1 - y_true) / (1 - clipped_dvalues)) / outputs
+        )
+
+        # normalization
+        self.dinputs = self.dinputs / samples
 
 
 class Activation_Softmax_Loss_CCE:
@@ -438,17 +462,28 @@ class Optimizer_Adam:
         self.iterations += 1
 
 
-X, y = spiral_data(samples=100, classes=3)
+# for the previous multi-class example
+# X, y = spiral_data(samples=100, classes=3)
+# loss_activation = (
+#     Activation_Softmax_Loss_CCE()
+# )  # will replace the separate loss and activation
+
+# for binary cross entropy test
+X, y = spiral_data(samples=100, classes=2)  # changing from 3 classes to 2
+y = y.reshape(-1, 1)  # reshape to be a list of lists
+# inner list contains 1 output per each output neuron
+
 dense1 = Layer_Dense(
-    2, 512, weightregl2=5e-4, biasregl2=5e-4
+    2, 64, weightregl2=5e-4, biasregl2=5e-4
 )  # 2 inputs 64 outputs, l2 reg
 # we usually add regularization terms to the hidden layers only
 
-dense2 = Layer_Dense(512, 3)  # 64 inputs 3 outputs
+dense2 = Layer_Dense(64, 1)  # 64 inputs 1 output
+# went from 3 outputs to 1 output bc the binary classification
+
 activation1 = Activation_ReLU()  # creating relu object
-loss_activation = (
-    Activation_Softmax_Loss_CCE()
-)  # will replace the separate loss and activation
+activation2 = Activation_Sigmoid()
+
 optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-5)  # higher LR, added LR decay
 dropout1 = Layer_Dropout(0.1)
 
