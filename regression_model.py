@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import nnfs
 from nnfs.datasets import sine_data
-from dense_layer_class import Loss
+from dense_layer_class import Activation_ReLU, Layer_Dense, Loss, Optimizer_Adam
 
 nnfs.init()
 
-X, y = sine_data()
+X, y = sine_data()  # using this as data
 plt.plot(X, y)
 plt.show()
 
@@ -53,3 +53,37 @@ class Loss_MeanAbsoluteError(Loss):  # a.k.a. L1 loss
 
         self.dinputs = np.sign(y_true - dvalues) / outputs
         self.dinputs = self.dinputs / samples
+
+
+dense1 = Layer_Dense(1, 64)  # imported from dense_layer_class
+activation1 = Activation_ReLU()
+dense2 = Layer_Dense(64, 1)  # output
+activation2 = Activation_Linear()
+loss_function = Loss_MeanSquaredError()
+optimizer = Optimizer_Adam()
+
+# using standard deviation with a random constant
+# so that the accuracy we use can adapt to the inputs at hand
+# e.g. if y is house prices in dollars (σ ≈ 100 k) the tolerance becomes 400 $.
+# if y is temperature in °C (σ ≈ 10 °C) the tolerance becomes 0.04 °C.
+acc_precision = np.std(y) / 250
+
+for epoch in range(10001):
+    # forward pass
+    dense1.forward(X)
+    activation1.forward(dense1.output)
+    dense2.forward(activation1.output)
+    activation2.forward(dense2.output)
+
+    data_loss = loss_function.calculate(activation2.output, y)
+    reg_loss = loss_function.reg_loss(dense1) + loss_function.reg_loss(dense2)
+    loss = data_loss + reg_loss
+
+    predictions = activation2.output
+    accuracy = np.mean(np.absolute(predictions - y) < acc_precision)
+
+    if not epoch % 100:  # same thing as epoch % 100 == 0
+        print(
+            f"epoch:{epoch}\nacc:{accuracy}\ndata loss:{data_loss}\
+            \nregularization loss:{reg_loss}\nlr:{optimizer.current_lr}"
+        )
