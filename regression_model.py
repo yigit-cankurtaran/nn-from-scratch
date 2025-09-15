@@ -87,3 +87,16 @@ for epoch in range(10001):
             f"epoch:{epoch}\nacc:{accuracy}\ndata loss:{data_loss}\
             \nregularization loss:{reg_loss}\nlr:{optimizer.current_lr}"
         )
+
+    # backward pass
+    loss_function.backward(activation2.output, y)
+    activation2.backward(loss_function.dinputs)
+    dense2.backward(activation2.dinputs)
+    activation1.backward(loss_function.dinputs)
+    dense1.backward(activation1.dinputs)
+
+    # weight and bias update
+    optimizer.pre_update_params()
+    optimizer.update_params(dense1)
+    optimizer.update_params(dense2)
+    optimizer.post_update_params()
