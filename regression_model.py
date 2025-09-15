@@ -55,12 +55,12 @@ class Loss_MeanAbsoluteError(Loss):  # a.k.a. L1 loss
         self.dinputs = self.dinputs / samples
 
 
-dense1 = Layer_Dense(1, 64)  # imported from dense_layer_class
+dense1 = Layer_Dense(1, 64, weightregl2=5e-4, biasregl2=5e-4)  # imported from dense_layer_class
 activation1 = Activation_ReLU()
 dense2 = Layer_Dense(64, 1)  # output
 activation2 = Activation_Linear()
 loss_function = Loss_MeanSquaredError()
-optimizer = Optimizer_Adam()
+optimizer = Optimizer_Adam(learning_rate=0.05, decay=5e-5)
 
 # using standard deviation with a random constant
 # so that the accuracy we use can adapt to the inputs at hand
@@ -92,7 +92,7 @@ for epoch in range(10001):
     loss_function.backward(activation2.output, y)
     activation2.backward(loss_function.dinputs)
     dense2.backward(activation2.dinputs)
-    activation1.backward(loss_function.dinputs)
+    activation1.backward(dense2.dinputs)
     dense1.backward(activation1.dinputs)
 
     # weight and bias update
