@@ -64,7 +64,7 @@ activation2 = Activation_ReLU()
 dense3 = Layer_Dense(64, 1)  # output
 activation3 = Activation_Linear()
 loss_function = Loss_MeanSquaredError()
-optimizer = Optimizer_Adam(learning_rate=5e-4, decay=5e-5)
+optimizer = Optimizer_Adam(learning_rate=0.005, decay=1e-3)
 
 # using standard deviation with a random constant
 # so that the accuracy we use can adapt to the inputs at hand
