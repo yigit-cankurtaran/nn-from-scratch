@@ -55,7 +55,9 @@ class Loss_MeanAbsoluteError(Loss):  # a.k.a. L1 loss
         self.dinputs = self.dinputs / samples
 
 
-dense1 = Layer_Dense(1, 64, weightregl2=5e-4, biasregl2=5e-4)  # imported from dense_layer_class
+dense1 = Layer_Dense(
+    1, 64, weightregl2=5e-4, biasregl2=5e-4
+)  # imported from dense_layer_class
 activation1 = Activation_ReLU()
 dense2 = Layer_Dense(64, 1)  # output
 activation2 = Activation_Linear()
@@ -100,3 +102,15 @@ for epoch in range(10001):
     optimizer.update_params(dense1)
     optimizer.update_params(dense2)
     optimizer.post_update_params()
+
+# visualizing
+X_test, y_test = sine_data()
+
+dense1.forward(X_test)
+activation1.forward(dense1.output)
+dense2.forward(activation1.output)
+activation2.forward(dense2.output)
+
+plt.plot(X_test, y_test)  # normal data
+plt.plot(X_test, activation2.output)  # normal data
+plt.show()
