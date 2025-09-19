@@ -17,7 +17,7 @@ class Layer_Dense:
     ):
         # initialize weights and biases
         # weights are random, biases are zero
-        self.weights = 0.01 * np.random.randn(
+        self.weights = 0.1 * np.random.randn(
             n_inputs, n_neurons
         )  # small, random magnitudes
         self.biases = np.zeros((1, n_neurons))
@@ -471,4 +471,3 @@ class Optimizer_Adam:
 # loss_activation = (
 #     Activation_Softmax_Loss_CCE()
 # )  # will replace the separate loss and activation
-
