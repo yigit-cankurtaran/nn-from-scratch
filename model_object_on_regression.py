@@ -1,17 +1,6 @@
 from nnfs.datasets import sine_data
 from dense_layer_class import Layer_Dense, Activation_ReLU
-
-
-class Activation_Linear:
-    def forward(self, inputs):
-        # linear activation simply passes values through
-        self.inputs = inputs
-        self.output = inputs
-
-    def backward(self, dvalues):
-        # derivative wrt inputs is 1 so gradient flows unchanged
-        self.dinputs = dvalues.copy()
-
+from regression_model import Activation_Linear
 
 X, y = sine_data()
 

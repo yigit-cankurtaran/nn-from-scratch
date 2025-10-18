@@ -7,8 +7,6 @@ from dense_layer_class import Activation_ReLU, Layer_Dense, Loss, Optimizer_Adam
 nnfs.init()
 
 X, y = sine_data()  # using this as data
-plt.plot(X, y)
-plt.show()
 
 
 # regression models use linear activation for output
@@ -55,75 +53,79 @@ class Loss_MeanAbsoluteError(Loss):  # a.k.a. L1 loss
         self.dinputs = self.dinputs / samples
 
 
-dense1 = Layer_Dense(
-    1, 64, weightregl2=5e-4, biasregl2=5e-4
-)  # imported from dense_layer_class
-activation1 = Activation_ReLU()
-dense2 = Layer_Dense(64, 64)
-activation2 = Activation_ReLU()
-dense3 = Layer_Dense(64, 1)  # output
-activation3 = Activation_Linear()
-loss_function = Loss_MeanSquaredError()
-optimizer = Optimizer_Adam(learning_rate=0.005, decay=1e-3)
+if __name__ == "__main__":
+    dense1 = Layer_Dense(
+        1, 64, weightregl2=5e-4, biasregl2=5e-4
+    )  # imported from dense_layer_class
+    activation1 = Activation_ReLU()
+    dense2 = Layer_Dense(64, 64)
+    activation2 = Activation_ReLU()
+    dense3 = Layer_Dense(64, 1)  # output
+    activation3 = Activation_Linear()
+    loss_function = Loss_MeanSquaredError()
+    optimizer = Optimizer_Adam(learning_rate=0.005, decay=1e-3)
 
-# using standard deviation with a random constant
-# so that the accuracy we use can adapt to the inputs at hand
-# e.g. if y is house prices in dollars (σ ≈ 100 k) the tolerance becomes 400 $.
-# if y is temperature in °C (σ ≈ 10 °C) the tolerance becomes 0.04 °C.
-acc_precision = np.std(y) / 250
+    # using standard deviation with a random constant
+    # so that the accuracy we use can adapt to the inputs at hand
+    # e.g. if y is house prices in dollars (σ ≈ 100 k) the tolerance becomes 400 $.
+    # if y is temperature in °C (σ ≈ 10 °C) the tolerance becomes 0.04 °C.
+    acc_precision = np.std(y) / 250
 
-for epoch in range(10001):
-    # forward pass
-    dense1.forward(X)
+    for epoch in range(10001):
+        # forward pass
+        dense1.forward(X)
+        activation1.forward(dense1.output)
+        dense2.forward(activation1.output)
+        activation2.forward(dense2.output)
+        dense3.forward(activation2.output)
+        activation3.forward(dense3.output)
+
+        data_loss = loss_function.calculate(activation3.output, y)
+        reg_loss = (
+            loss_function.reg_loss(dense1)
+            + loss_function.reg_loss(dense2)
+            + loss_function.reg_loss(dense3)
+        )
+        loss = data_loss + reg_loss
+
+        predictions = activation3.output
+        accuracy = np.mean(np.absolute(predictions - y) < acc_precision)
+
+        if not epoch % 100:  # same thing as epoch % 100 == 0
+            print(
+                f"epoch:{epoch}\nacc:{accuracy}\ndata loss:{data_loss}\
+                \nregularization loss:{reg_loss}\nlr:{optimizer.current_lr}"
+            )
+
+        # backward pass
+        loss_function.backward(activation3.output, y)
+        activation3.backward(loss_function.dinputs)
+        dense3.backward(activation3.dinputs)
+        activation2.backward(dense3.dinputs)
+        dense2.backward(activation2.dinputs)
+        activation1.backward(dense2.dinputs)
+        dense1.backward(activation1.dinputs)
+
+        # weight and bias update
+        optimizer.pre_update_params()
+        optimizer.update_params(dense1)
+        optimizer.update_params(dense2)
+        optimizer.update_params(dense3)
+        optimizer.post_update_params()
+
+    # visualizing
+    X_test, y_test = sine_data()
+
+    dense1.forward(X_test)
     activation1.forward(dense1.output)
     dense2.forward(activation1.output)
     activation2.forward(dense2.output)
     dense3.forward(activation2.output)
     activation3.forward(dense3.output)
 
-    data_loss = loss_function.calculate(activation3.output, y)
-    reg_loss = (
-        loss_function.reg_loss(dense1)
-        + loss_function.reg_loss(dense2)
-        + loss_function.reg_loss(dense3)
-    )
-    loss = data_loss + reg_loss
+    plt.plot(X, y)  # how the dataset normally looks like
+    plt.show()
 
-    predictions = activation3.output
-    accuracy = np.mean(np.absolute(predictions - y) < acc_precision)
-
-    if not epoch % 100:  # same thing as epoch % 100 == 0
-        print(
-            f"epoch:{epoch}\nacc:{accuracy}\ndata loss:{data_loss}\
-            \nregularization loss:{reg_loss}\nlr:{optimizer.current_lr}"
-        )
-
-    # backward pass
-    loss_function.backward(activation3.output, y)
-    activation3.backward(loss_function.dinputs)
-    dense3.backward(activation3.dinputs)
-    activation2.backward(dense3.dinputs)
-    dense2.backward(activation2.dinputs)
-    activation1.backward(dense2.dinputs)
-    dense1.backward(activation1.dinputs)
-
-    # weight and bias update
-    optimizer.pre_update_params()
-    optimizer.update_params(dense1)
-    optimizer.update_params(dense2)
-    optimizer.update_params(dense3)
-    optimizer.post_update_params()
-
-# visualizing
-X_test, y_test = sine_data()
-
-dense1.forward(X_test)
-activation1.forward(dense1.output)
-dense2.forward(activation1.output)
-activation2.forward(dense2.output)
-dense3.forward(activation2.output)
-activation3.forward(dense3.output)
-
-plt.plot(X_test, y_test)  # normal data
-plt.plot(X_test, activation3.output)  # normal data
-plt.show()
+    plt.plot(X_test, y_test)  # normal data
+    plt.plot(X_test, activation3.output)  # normal data
+    plt.show()
