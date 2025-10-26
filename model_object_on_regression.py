@@ -17,7 +17,7 @@ class Model:
     def set(self, *, loss, optim):
         """
         to set loss function and optimizer
-        \* here means that anything after it are keywords, passed by names and vals
+        "*" here means that anything after it are keywords, passed by names and vals
         """
         self.loss = loss
         self.optim = optim
@@ -37,4 +37,4 @@ model.set(
     loss=Loss_MeanSquaredError(), optim=Optimizer_Adam(learning_rate=0.005, decay=1e-3)
 )
 
-print(model.layers)
+# print(model.layers)
