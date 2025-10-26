@@ -44,3 +44,6 @@ model.set(
 def train(self, X, y, *, epochs=1, print_every=1):
     for epoch in range(1, epochs + 1):
         pass
+
+
+model.train(X, y, epochs=10000, print_every=100)
