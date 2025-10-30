@@ -23,6 +23,13 @@ class Model:
         self.optim = optim
 
 
+# input layer, because dense layers need to query previous ones
+# first layers won't have a previous layer, those need to be input
+class Layer_Input:
+    def forward(self, inputs):
+        self.output = inputs
+
+
 model = Model()  # instantiate object
 
 # adding layers
@@ -40,7 +47,6 @@ model.set(
 # print(model.layers)
 
 
-# TODO: ankify the * parameter
 def train(self, X, y, *, epochs=1, print_every=1):
     for epoch in range(1, epochs + 1):
         pass
